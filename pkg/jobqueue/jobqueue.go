@@ -1,37 +1,47 @@
 package jobqueue
 
+import (
+	"sync"
+)
 
 type Job interface {
-	Process() (interface, error) 
+	Process()
 }
 
 type JobQueue struct {
 	// use a WaitGroup for implementing waiting of ending all jobs
-	var wg sync.WaitGroup
-	//
-	jobChan chan(func)
+	wg      sync.WaitGroup
+	jobChan chan (Job)
 }
 
-func NewJobQueue struct {
-	
+func NewJobQueue(workerNumber int) *JobQueue {
+	queue := JobQueue{
+		sync.WaitGroup{},
+		make(chan Job, workerNumber),
+	}
+	queue.wg.Add(1)
+	go queue.runWorkers()
+	return &queue
 }
 
-
-
-func worker(jobChan <-chan Job) {
-    defer wg.Done()
-
-    for job := range jobChan {
-        process(job)
-    }
+func (jobQueue *JobQueue) PushJob(job Job) {
+	jobQueue.jobChan <- job
 }
 
-// increment the WaitGroup before starting the worker
-wg.Add(1)
-go worker(jobChan)
+//
+func (jobQueue *JobQueue) Close() {
+	close(jobQueue.jobChan)
+	jobQueue.wg.Wait()
 
-// to stop the worker, first close the job channel
-close(jobChan)
+}
 
-// then wait using the WaitGroup
-wg.Wait()
+func (jobQueue *JobQueue) runWorkers() {
+	for job := range jobQueue.jobChan {
+		jobQueue.wg.Add(1)
+		go func() {
+			defer jobQueue.wg.Done()
+			job.Process()
+		}()
+	}
+	jobQueue.wg.Done()
+}
