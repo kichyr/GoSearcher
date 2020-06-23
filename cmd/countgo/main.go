@@ -10,57 +10,54 @@ import (
 	"github.com/kichyr/GoSearcher/pkg/textsearch"
 )
 
-type Result struct {
-	Source    string
-	WordCount int
-	Error     error
-}
+// initial settings
+const (
+	searchString        = "go"
+	defaultWorkerNumber = 5
+)
 
-func ResultWriter(results <-chan Result) {
-	for result := range results {
-
-		if result.Error != nil {
-			fmt.Printf("Failed to count 'go' in %s. %v\n", result.Source, result.Error)
-			continue
-		}
-
-		fmt.Printf("Count for %s: %d\n", result.Source, result.WordCount)
-	}
-}
-
+// Implementation of the interface for working with jobqueue package.
 type job struct {
 	source string
 	result chan Result
 }
 
+// Process wraps necessary function in method without arguments and return values
+// to be executed in job queue.
 func (j *job) Process() {
-	count, err := textsearch.CountString("go", j.source)
+	count, err := textsearch.CountString(searchString, j.source)
 	if err != nil {
-		j.result <- Result{j.source, 0, err}
+		j.result <- Result{j.source, 0, err, false}
 		return
 	}
-	j.result <- Result{j.source, count, nil}
+	j.result <- Result{j.source, count, nil, false}
 }
 
 func main() {
 	var (
 		workerNumber int
 	)
-	flag.IntVar(&workerNumber, "k", 5, "Maximum workers")
+	flag.IntVar(&workerNumber, "k", defaultWorkerNumber, "Maximum workers")
 	flag.Parse()
 
 	inputReader := bufio.NewScanner(os.Stdin)
-	results := make(chan Result)
 
 	jobs := jobqueue.NewJobQueue(workerNumber)
 
-	go ResultWriter(results)
+	resWriter := NewResultWriter()
+
+	// goroutine that prints results from results chan
+	resWriter.Run(resWriter.Results)
 
 	for inputReader.Scan() {
 		s := inputReader.Text()
-		jobs.PushJob(&job{s, results})
+		// Push new job in queue.
+		// If queue is full it blocks until the worker gets out.
+		// If there is free worker it doesn't block and continue to read input.
+		jobs.PushJob(&job{s, resWriter.Results})
 	}
+	fmt.Println("kek")
 
-	close(results)
 	jobs.Close()
+	resWriter.Close()
 }
