@@ -25,8 +25,14 @@ func CountString(searchString string, resource string) (int, error) {
 	}
 }
 
-func CountStringByFilePath(searchString string, URL string) (int, error) {
-	return 0, nil
+func CountStringByFilePath(searchString string, path string) (int, error) {
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return 0, fmt.Errorf("can't open file %s: %v", path, err)
+	}
+
+	return bytes.Count(data, []byte(searchString)), nil
 }
 
 func CountStringByURL(searchString string, URL string) (int, error) {
