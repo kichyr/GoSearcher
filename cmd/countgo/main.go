@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	"os"
 
 	"github.com/kichyr/GoSearcher/pkg/jobqueue"
@@ -56,7 +55,6 @@ func main() {
 		// If there is free worker it doesn't block and continue to read input.
 		jobs.PushJob(&job{s, resWriter.Results})
 	}
-	fmt.Println("kek")
 
 	jobs.Close()
 	resWriter.Close()

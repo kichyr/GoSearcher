@@ -32,7 +32,6 @@ func (rw *ResultWriter) Close() {
 }
 
 func (rw *ResultWriter) Run(results <-chan Result) {
-	fmt.Print("lol")
 	rw.wg.Add(1)
 	go rw.run(results)
 }
