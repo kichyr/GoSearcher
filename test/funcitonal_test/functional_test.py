@@ -3,9 +3,6 @@ This module contains functional tests of the cubeclient tool.
 """
 import subprocess
 import pytest
-import requests
-import shlex
-
 
 test_body = "gogog go \ngo"
 @pytest.mark.server(url='/test', response=[test_body])
