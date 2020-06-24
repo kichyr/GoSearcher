@@ -57,3 +57,21 @@ def test_big_input_data():
     process = subprocess.Popen(['bash', '-c', cmd], stdout=subprocess.PIPE)
     out, _ = process.communicate()
     assert(out.count(b'Count for ./test/test_files/simple_test.txt: 4') == 100)
+
+
+def test_file_resource_no_such_file_error():
+    cmd = "echo -e './test/test_files/no_such_file.txt' | ./countgo -k=1"
+    process = subprocess.Popen(['bash', '-c', cmd], stdout=subprocess.PIPE)
+    out, _ = process.communicate()
+    assert(
+        out == b"Failed to count 'go' in ./test/test_files/no_such_file.txt\n"
+        )
+
+
+def test__web_resource_unavailable_error():
+    cmd = "echo -e 'http://localhost:0/test' | ./countgo -k=1"
+    process = subprocess.Popen(['bash', '-c', cmd], stdout=subprocess.PIPE)
+    out, _ = process.communicate()
+    assert(
+        out == b"Failed to count 'go' in http://localhost:0/test\n"
+        )
