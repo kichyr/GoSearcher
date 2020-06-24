@@ -12,7 +12,7 @@ $ make build
 $ echo -e 'https://golang.org/doc/effective_go.html\n./test test_files/simple_test.txt' | ./countgo -k=5
 ```
 
-## Run test in docker:
+## Run tests in docker:
 ```
 $ make test
 ```
@@ -29,6 +29,6 @@ make benchmark
 ```
 
 ## Benchmark
-Thats what I've got on "https://golang.org/doc/effective_go.html\nhttps://ru.wikipedia.org/wiki/Go" * 200 string
+Thats what I've got on "\nhttps://golang.org/doc/effective_go.html\n./test/test_files/big_test.txt\nhttps://ru.wikipedia.org/wiki/Go" * 50 string
 
 ![](https://raw.githubusercontent.com/kichyr/GoSearcher/master/test/benchmarks/bench.png)
