@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/kichyr/GoSearcher/pkg/jobqueue"
@@ -43,7 +44,11 @@ func main() {
 
 	inputReader := bufio.NewScanner(os.Stdin)
 
-	jobs := jobqueue.NewJobQueue(workerNumber)
+	jobs, err := jobqueue.NewJobQueue(workerNumber)
+	if err != nil {
+		fmt.Printf("Can't create worker queue, failed: %v", err)
+		os.Exit(1)
+	}
 
 	resWriter := NewResultWriter(ResultWriterConfig{debug})
 

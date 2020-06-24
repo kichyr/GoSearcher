@@ -1,6 +1,7 @@
 package jobqueue
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -22,14 +23,19 @@ type JobQueue struct {
 	jobChan chan (Job)
 }
 
-func NewJobQueue(workerNumber int) *JobQueue {
+func NewJobQueue(workerNumber int) (*JobQueue, error) {
+	if workerNumber < 1 {
+		return nil, fmt.Errorf(
+			"Give wrong worker number: %v, it should be greater than 0",
+			workerNumber)
+	}
 	queue := JobQueue{
 		sync.WaitGroup{},
 		make(chan Job, workerNumber),
 	}
 	queue.wg.Add(1)
 	go queue.runWorkers()
-	return &queue
+	return &queue, nil
 }
 
 // PushJob add new job in queue.
