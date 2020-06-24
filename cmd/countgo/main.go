@@ -58,8 +58,9 @@ func main() {
 	for inputReader.Scan() {
 		s := inputReader.Text()
 		// Push new job in queue.
-		// If queue is full it blocks until the worker gets out.
-		// If there is free worker it doesn't block and continue to read input.
+		// If queue is full it blocks until the some worker gets out.
+		// If there is free worker it doesn't block
+		// it starts nre job in worker and continue to read input.
 		jobs.PushJob(Job{s, resWriter.Results})
 	}
 

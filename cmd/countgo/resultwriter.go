@@ -15,7 +15,7 @@ type Result struct {
 
 // ResultWriterConfig contains settings for ResultWriter.
 type ResultWriterConfig struct {
-	// Debug ON show full errors.
+	// Debug ON show full error stack.
 	Debug bool
 }
 
@@ -35,6 +35,7 @@ func NewResultWriter(config ResultWriterConfig) ResultWriter {
 }
 
 func (rw *ResultWriter) Close() {
+	// push end indicator element
 	rw.Results <- Result{"", 0, nil, true}
 	close(rw.Results)
 }

@@ -27,9 +27,11 @@ type jobWrap struct {
 
 type JobQueue struct {
 	// use a WaitGroup for implementing waiting of ending all jobs
-	wg      sync.WaitGroup
+	wg sync.WaitGroup
+	// use as queue
 	jobChan chan (jobWrap)
-	sem     chan int
+	// implementing semaphore that bound worker number
+	sem chan int
 }
 
 func NewJobQueue(workerNumber int) (*JobQueue, error) {
@@ -59,6 +61,7 @@ func (jobQueue *JobQueue) PushJob(job Job) {
 func (jobQueue *JobQueue) Close() {
 	jobQueue.jobChan <- jobWrap{nil, true}
 	jobQueue.wg.Wait()
+	close(jobQueue.sem)
 	close(jobQueue.jobChan)
 }
 
