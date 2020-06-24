@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-// Result represents answer received from textsearch package
+// Result represents answer received from textsearch package.
 type Result struct {
 	Source    string
 	WordCount int
@@ -23,10 +23,10 @@ type ResultWriter struct {
 	wg sync.WaitGroup
 	// chan for storing and printing result for different sources
 	Results chan Result
-	Config ResultWriterConfig
+	Config  ResultWriterConfig
 }
 
-func NewResultWriter(config ResultWriterConfig) ResultWriter{
+func NewResultWriter(config ResultWriterConfig) ResultWriter {
 	return ResultWriter{
 		sync.WaitGroup{},
 		make(chan Result),
@@ -50,10 +50,21 @@ func (rw *ResultWriter) run(results <-chan Result) {
 			break
 		}
 		if result.Error != nil {
-			if  rw.Config.Debug {
-				fmt.Printf("Failed to count 'go' in %s failed: %v\n", result.Source, result.Error)
+			if rw.Config.Debug {
+				// show full error stack
+				fmt.Printf(
+					"Failed to count '%s' in %s failed: %v\n",
+					searchString,
+					result.Source,
+					result.Error,
+				)
 			} else {
-				fmt.Printf("Failed to count 'go' in %s\n", result.Source)
+				// show only top error
+				fmt.Printf(
+					"Failed to count '%s' in %s\n",
+					searchString,
+					result.Source,
+				)
 			}
 			continue
 		}
