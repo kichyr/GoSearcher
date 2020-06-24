@@ -2,27 +2,50 @@ package jobqueue
 
 import (
 	"testing"
+	"time"
 )
 
-const test_string = "test_answer"
-
 type testJob struct {
-	answer string
+	jobId int
+	res   chan int
 }
 
 func (tj *testJob) Process() {
-	tj.answer = test_string
+	if tj.jobId == 0 {
+		time.Sleep(1 * time.Second)
+		tj.res <- tj.jobId
+	} else {
+		tj.res <- tj.jobId
+	}
 }
 
-func TestJobQueue(t *testing.T) {
-	jQueue, _ := NewJobQueue(5)
-	tj := &testJob{}
-	jQueue.PushJob(tj)
+func TestJobQueueOneWorker(t *testing.T) {
+	jQueue, _ := NewJobQueue(1)
+	res := make(chan int, 2)
+	jQueue.PushJob(&testJob{0, res})
+	jQueue.PushJob(&testJob{1, res})
 	jQueue.Close()
-	if tj.answer != test_string {
+	res1 := <-res
+	res2 := <-res
+
+	if !(res1 == 0 && res2 == 1) {
 		t.Errorf(
-			"job was not done properly, get result: %s, expected: %s",
-			tj.answer,
-			test_string)
+			"For worker number = 1 JobQueue got the result in an inconsistent sequence with push order.",
+		)
+	}
+}
+func TestJobQueueTwoWorkers(t *testing.T) {
+	jQueue, _ := NewJobQueue(2)
+	res := make(chan int, 2)
+	jQueue.PushJob(&testJob{0, res})
+	jQueue.PushJob(&testJob{1, res})
+	jQueue.Close()
+	res1 := <-res
+	res2 := <-res
+
+	if !(res1 == 1 && res2 == 0) {
+		t.Errorf(
+			"For worker number = 2 JobQueue should have done the faster job first but that didn't happen",
+		)
 	}
 }
