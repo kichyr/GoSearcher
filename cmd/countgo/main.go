@@ -35,15 +35,17 @@ func (j Job) Process() {
 func main() {
 	var (
 		workerNumber int
+		debug        bool
 	)
 	flag.IntVar(&workerNumber, "k", defaultWorkerNumber, "Maximum workers")
+	flag.BoolVar(&debug, "debug", false, "Shows full error description")
 	flag.Parse()
 
 	inputReader := bufio.NewScanner(os.Stdin)
 
 	jobs := jobqueue.NewJobQueue(workerNumber)
 
-	resWriter := NewResultWriter()
+	resWriter := NewResultWriter(ResultWriterConfig{debug})
 
 	// goroutine that prints results from results chan
 	resWriter.Run(resWriter.Results)

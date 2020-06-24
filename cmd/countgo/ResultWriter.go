@@ -13,16 +13,24 @@ type Result struct {
 	endOfData bool
 }
 
+// ResultWriterConfig contains settings for ResultWriter.
+type ResultWriterConfig struct {
+	// Debug ON show full errors.
+	Debug bool
+}
+
 type ResultWriter struct {
 	wg sync.WaitGroup
 	// chan for storing and printing result for different sources
 	Results chan Result
+	Config ResultWriterConfig
 }
 
-func NewResultWriter() ResultWriter{
+func NewResultWriter(config ResultWriterConfig) ResultWriter{
 	return ResultWriter{
 		sync.WaitGroup{},
 		make(chan Result),
+		config,
 	}
 }
 
@@ -42,7 +50,11 @@ func (rw *ResultWriter) run(results <-chan Result) {
 			break
 		}
 		if result.Error != nil {
-			fmt.Printf("Failed to count 'go' in %s. %v\n", result.Source, result.Error)
+			if  rw.Config.Debug {
+				fmt.Printf("Failed to count 'go' in %s failed: %v\n", result.Source, result.Error)
+			} else {
+				fmt.Printf("Failed to count 'go' in %s\n", result.Source)
+			}
 			continue
 		}
 		fmt.Printf("Count for %s: %d\n", result.Source, result.WordCount)
