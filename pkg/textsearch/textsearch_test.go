@@ -12,8 +12,7 @@ func TestGetResponseBody(t *testing.T) {
 	// start test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(response))
-		return
+		_, _ = w.Write([]byte(response))
 	}))
 	//
 
@@ -36,8 +35,7 @@ func TestCountStringByURL(t *testing.T) {
 	// start test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(response))
-		return
+		_, _ = w.Write([]byte(response))
 	}))
 	//
 

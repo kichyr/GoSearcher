@@ -4,19 +4,25 @@ import (
 	"testing"
 )
 
+const test_string = "test_answer"
+
 type testJob struct {
 	answer string
 }
 
 func (tj *testJob) Process() {
-	tj.answer = "test_answer"
+	tj.answer = test_string
 }
 
 func TestJobQueue(t *testing.T) {
 	jQueue := NewJobQueue(5)
 	tj := &testJob{}
-	jQueue.PushJob()
+	jQueue.PushJob(tj)
 	jQueue.Close()
-	assert.Equal(t, tj.answer, "test_answer", "The two words should be the same.")
-
+	if tj.answer != test_string {
+		t.Errorf(
+			"job was not done properly, get result: %s, expected: %s",
+			tj.answer,
+			test_string)
+	}
 }
