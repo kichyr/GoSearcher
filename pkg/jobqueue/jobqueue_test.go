@@ -15,7 +15,7 @@ func (tj *testJob) Process() {
 }
 
 func TestJobQueue(t *testing.T) {
-	jQueue := NewJobQueue(5)
+	jQueue, _ := NewJobQueue(5)
 	tj := &testJob{}
 	jQueue.PushJob(tj)
 	jQueue.Close()

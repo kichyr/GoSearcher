@@ -3,7 +3,7 @@ TARGET="countgo"
 
 
 
-CMD_RESOURCES=`printf 'https://golang.org/doc/effective_go.html\nhttps://ru.wikipedia.org/wiki/Go\n%.0s' {1..200}`
+CMD_RESOURCES=`printf '\\nhttps://golang.org/doc/effective_go.html\\n./test/test_files/big_test.txt\\nhttps://ru.wikipedia.org/wiki/Go%.0s' {1..50}`
 rm -f test/benchmarks/plot.dat 
 
 for worker_num in 1 2 4 8 16 32 64

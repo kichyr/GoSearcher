@@ -17,10 +17,19 @@ type Job interface {
 	Process()
 }
 
+// jobWrap add additional info to users Job interface
+// implementation such as endFlag
+// that becomes true when user tries to Close().
+type jobWrap struct {
+	job     Job
+	endFlag bool
+}
+
 type JobQueue struct {
 	// use a WaitGroup for implementing waiting of ending all jobs
 	wg      sync.WaitGroup
-	jobChan chan (Job)
+	jobChan chan (jobWrap)
+	sem     chan int
 }
 
 func NewJobQueue(workerNumber int) (*JobQueue, error) {
@@ -31,7 +40,8 @@ func NewJobQueue(workerNumber int) (*JobQueue, error) {
 	}
 	queue := JobQueue{
 		sync.WaitGroup{},
-		make(chan Job, workerNumber),
+		make(chan jobWrap, workerNumber),
+		make(chan int, workerNumber),
 	}
 	queue.wg.Add(1)
 	go queue.runWorkers()
@@ -41,24 +51,31 @@ func NewJobQueue(workerNumber int) (*JobQueue, error) {
 // PushJob add new job in queue.
 // It blocks when there is no free workers.
 func (jobQueue *JobQueue) PushJob(job Job) {
-	jobQueue.jobChan <- job
+	jobQueue.jobChan <- jobWrap{job, false}
 }
 
 // Close should be called after all jobs will be pushed into queue.
 // It blocks until all jobs in the queue will be done.
 func (jobQueue *JobQueue) Close() {
-	close(jobQueue.jobChan)
+	jobQueue.jobChan <- jobWrap{nil, true}
 	jobQueue.wg.Wait()
-
+	close(jobQueue.jobChan)
 }
 
 func (jobQueue *JobQueue) runWorkers() {
-	for job := range jobQueue.jobChan {
+	for jobWrp := range jobQueue.jobChan {
+		if jobWrp.endFlag {
+			break
+		}
 		jobQueue.wg.Add(1)
+		// acquire semaphore
+		jobQueue.sem <- 1
 		go func(j Job) {
 			defer jobQueue.wg.Done()
 			j.Process()
-		}(job)
+			// release semaphore
+			<-jobQueue.sem
+		}(jobWrp.job)
 	}
 	jobQueue.wg.Done()
 }
