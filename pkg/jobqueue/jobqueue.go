@@ -49,10 +49,10 @@ func (jobQueue *JobQueue) Close() {
 func (jobQueue *JobQueue) runWorkers() {
 	for job := range jobQueue.jobChan {
 		jobQueue.wg.Add(1)
-		go func() {
+		go func(j Job) {
 			defer jobQueue.wg.Done()
-			job.Process()
-		}()
+			j.Process()
+		}(job)
 	}
 	jobQueue.wg.Done()
 }
