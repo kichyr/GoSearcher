@@ -40,6 +40,7 @@ func NewResultWriter(config ResultWriterConfig) ResultWriter {
 func (rw *ResultWriter) Close() {
 	// push end indicator element
 	rw.Results <- Result{"", 0, nil, true}
+	rw.wg.Wait()
 	close(rw.Results)
 }
 

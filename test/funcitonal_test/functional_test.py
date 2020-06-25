@@ -4,7 +4,7 @@ This module contains functional tests of the cubeclient tool.
 import subprocess
 import pytest
 
-test_body = "gogog go \ngo"
+test_body = "goGog go \nGO"
 @pytest.mark.server(url='/test', response=[test_body])
 def test_web_resource_normal_response():
     cmd = "echo -e 'http://localhost:5000/test' | ./countgo"

@@ -32,7 +32,7 @@ func CountStringByFilePath(searchString string, path string) (int, error) {
 		return 0, fmt.Errorf("can't open file %s: %v", path, err)
 	}
 
-	return bytes.Count(data, []byte(searchString)), nil
+	return bytes.Count(bytes.ToLower(data), []byte(strings.ToLower(searchString))), nil
 }
 
 func CountStringByURL(searchString string, URL string) (int, error) {
@@ -40,7 +40,7 @@ func CountStringByURL(searchString string, URL string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return bytes.Count(data, []byte(searchString)), nil
+	return bytes.Count(bytes.ToLower(data), []byte(strings.ToLower(searchString))), nil
 }
 
 func get(URL string) ([]byte, error) {
