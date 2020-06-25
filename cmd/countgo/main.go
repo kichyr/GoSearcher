@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/kichyr/GoSearcher/cmd/countgo/resultwriter"
 	"github.com/kichyr/GoSearcher/pkg/jobqueue"
 	"github.com/kichyr/GoSearcher/pkg/textsearch"
 )
@@ -19,7 +20,7 @@ const (
 // Implementation of the interface for working with jobqueue package.
 type Job struct {
 	source string
-	result chan Result
+	result chan resultwriter.Result
 }
 
 // Process wraps necessary function in method without arguments and return values
@@ -27,10 +28,20 @@ type Job struct {
 func (j Job) Process() {
 	count, err := textsearch.CountString(searchString, j.source)
 	if err != nil {
-		j.result <- Result{j.source, 0, err, false}
+		j.result <- resultwriter.Result{
+			Source:    j.source,
+			WordCount: 0,
+			Error:     err,
+			EndOfData: false,
+		}
 		return
 	}
-	j.result <- Result{j.source, count, nil, false}
+	j.result <- resultwriter.Result{
+		Source:    j.source,
+		WordCount: count,
+		Error:     nil,
+		EndOfData: false,
+	}
 }
 
 func main() {
@@ -41,7 +52,6 @@ func main() {
 	flag.IntVar(&workerNumber, "k", defaultWorkerNumber, "Maximum workers")
 	flag.BoolVar(&debug, "debug", false, "Shows full error description")
 	flag.Parse()
-
 	inputReader := bufio.NewScanner(os.Stdin)
 
 	jobs, err := jobqueue.NewJobQueue(workerNumber)
@@ -50,7 +60,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	resWriter := NewResultWriter(ResultWriterConfig{debug})
+	resWriter := resultwriter.NewResultWriter(
+		resultwriter.ResultWriterConfig{
+			Debug:        debug,
+			SearchString: searchString,
+		})
 
 	// goroutine that prints results from results chan
 	resWriter.Run(resWriter.Results)

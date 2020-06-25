@@ -1,4 +1,4 @@
-package main
+package resultwriter
 
 import (
 	"fmt"
@@ -10,13 +10,14 @@ type Result struct {
 	Source    string
 	WordCount int
 	Error     error
-	endOfData bool
+	EndOfData bool
 }
 
 // ResultWriterConfig contains settings for ResultWriter.
 type ResultWriterConfig struct {
 	// Debug ON show full error stack.
-	Debug bool
+	Debug        bool
+	SearchString string
 }
 
 type ResultWriter struct {
@@ -47,7 +48,7 @@ func (rw *ResultWriter) Run(results <-chan Result) {
 
 func (rw *ResultWriter) run(results <-chan Result) {
 	for result := range results {
-		if result.endOfData {
+		if result.EndOfData {
 			break
 		}
 		if result.Error != nil {
@@ -55,7 +56,7 @@ func (rw *ResultWriter) run(results <-chan Result) {
 				// show full error stack
 				fmt.Printf(
 					"Failed to count '%s' in %s failed: %v\n",
-					searchString,
+					rw.Config.SearchString,
 					result.Source,
 					result.Error,
 				)
@@ -63,7 +64,7 @@ func (rw *ResultWriter) run(results <-chan Result) {
 				// show only top error
 				fmt.Printf(
 					"Failed to count '%s' in %s\n",
-					searchString,
+					rw.Config.SearchString,
 					result.Source,
 				)
 			}
