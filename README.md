@@ -9,7 +9,7 @@ Also here you can find some functional and unit tests for this app and benchmark
 ```
 # here k=x means number of workers
 $ make build
-$ echo -e 'https://golang.org/doc/effective_go.html\n./test test_files/simple_test.txt' | ./countgo -k=5
+$ echo -e 'https://golang.org/doc/effective_go.html\n./test/test_files/simple_test.txt' | ./countgo -k=5
 ```
 
 ## Run tests in docker:

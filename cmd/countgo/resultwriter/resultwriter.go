@@ -25,6 +25,7 @@ type ResultWriter struct {
 	// chan for storing and printing result for different sources
 	Results chan Result
 	Config  ResultWriterConfig
+	Total   int
 }
 
 func NewResultWriter(config ResultWriterConfig) ResultWriter {
@@ -32,6 +33,7 @@ func NewResultWriter(config ResultWriterConfig) ResultWriter {
 		sync.WaitGroup{},
 		make(chan Result),
 		config,
+		0,
 	}
 }
 
@@ -49,6 +51,7 @@ func (rw *ResultWriter) Run(results <-chan Result) {
 func (rw *ResultWriter) run(results <-chan Result) {
 	for result := range results {
 		if result.EndOfData {
+			fmt.Printf("Total: %d\n", rw.Total)
 			break
 		}
 		if result.Error != nil {
@@ -71,6 +74,7 @@ func (rw *ResultWriter) run(results <-chan Result) {
 			continue
 		}
 		fmt.Printf("Count for %s: %d\n", result.Source, result.WordCount)
+		rw.Total += result.WordCount
 	}
 	rw.wg.Done()
 }
